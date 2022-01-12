@@ -1,0 +1,6 @@
+www
+dev
+test
+mail
+calendar
+meet
