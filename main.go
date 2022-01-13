@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/akamensky/argparse"
 )
@@ -37,17 +38,20 @@ func makeRequest(wordlist []string, domain string, ssl *bool, writeOut *bool, fi
 	protocol := "http"
 	var out []string
 
+	client := http.Client{
+		Timeout: 2 * time.Second,
+	}
+
 	if *ssl == true {
 		protocol = "https"
 	}
 
 	for i := 0; i < len(wordlist); i++ {
-		resp, err := http.Get(protocol + "://" + wordlist[i] + "." + domain + ":" + *port + "/")
-		if err != nil && strings.Contains(err.Error(), "no such host") {
+		resp, err := client.Get(protocol + "://" + wordlist[i] + "." + domain + ":" + *port + "/")
+		if err != nil {
 			bad_domain_counter += 1
 			continue
 		} else if resp.Status == "200 OK" {
-			// fmt.Println(string("\033[32m"), protocol, "://"+wordlist[i], ".", domain, ":", *port, "/", ": 200 OK")
 			result := fmt.Sprintf("\033[32m%s%s%s%s%s%s%s%s%s", protocol, "://", wordlist[i], ".", domain, ":", *port, "/", " | 200 OK")
 			fmt.Println(result)
 			if *writeOut == true {
